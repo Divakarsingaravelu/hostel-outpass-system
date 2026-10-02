@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Users{% endblock %}{% block content %}
+<div class="page-header d-flex justify-content-between"><h4><i class="bi bi-people me-2"></i>Users</h4>
+<div><a href="{{ url_for('admin.create_user') }}" class="btn btn-primary me-2"><i class="bi bi-plus me-1"></i>Add User</a><a href="{{ url_for('admin.import_users') }}" class="btn btn-outline-primary"><i class="bi bi-upload me-1"></i>Import CSV</a></div></div>
+<div class="card mb-3"><div class="card-body py-2"><form method="GET" class="row g-2">
+<div class="col-md-2"><select name="role" class="form-select form-select-sm"><option value="">All Roles</option>{% for r in ['admin','student','warden','advisor','guard'] %}<option {% if role_filter==r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></div>
+<div class="col-md-3"><input name="search" class="form-control form-control-sm" placeholder="Search..." value="{{ search }}"></div>
+<div class="col-auto"><button class="btn btn-primary btn-sm">Filter</button></div></form></div></div>
+<div class="table-responsive"><table class="table table-custom"><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Email</th><th>Active</th><th>Actions</th></tr></thead><tbody>
+{% for u in users.items %}<tr><td>{{ u.username }}</td><td>{{ u.full_name }}</td><td><span class="badge bg-secondary">{{ u.role }}</span></td><td>{{ u.email or '' }}</td>
+<td>{% if u.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}</td>
+<td><form method="POST" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-{% if u.is_active %}danger{% else %}success{% endif %}">{% if u.is_active %}Deactivate{% else %}Activate{% endif %}</button></form></td>
+</tr>{% endfor %}</tbody></table></div>
+{% if users.pages > 1 %}<nav><ul class="pagination justify-content-center">{% if users.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ users.prev_num }}&role={{ role_filter }}&search={{ search }}">Prev</a></li>{% endif %}{% for p in users.iter_pages() %}{% if p %}<li class="page-item {% if p==users.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&role={{ role_filter }}&search={{ search }}">{{ p }}</a></li>{% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}{% endfor %}{% if users.has_next %}<li class="page-item"><a class="page-link" href="?page={{ users.next_num }}&role={{ role_filter }}&search={{ search }}">Next</a></li>{% endif %}</ul></nav>{% endif %}
+{% endblock %}

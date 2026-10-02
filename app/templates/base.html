@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Digital Hostel Outpass Management System">
+    <title>{% block title %}Hostel Outpass{% endblock %} | College Portal</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white d-lg-none me-2" id="sidebarToggle">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-building me-1"></i> Hostel Outpass System
+            </a>
+            
+            {% if current_user.is_authenticated %}
+            <div class="d-flex align-items-center ms-auto">
+                <!-- Notification Bell -->
+                <a href="{% if current_user.role == 'student' %}{{ url_for('student.notifications') }}{% elif current_user.role in ['warden', 'advisor'] %}{{ url_for('warden.notifications') }}{% else %}#{% endif %}" 
+                   class="nav-link notification-bell me-3">
+                    <i class="bi bi-bell-fill text-white fs-5"></i>
+                    {% if unread_count > 0 %}
+                    <span class="badge bg-danger">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        {% if current_user.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/photos/' + current_user.photo_filename) }}" 
+                             alt="Photo" class="rounded-circle me-2" width="30" height="30" style="object-fit:cover;">
+                        {% else %}
+                        <i class="bi bi-person-circle text-white me-2 fs-5"></i>
+                        {% endif %}
+                        <span class="text-white d-none d-md-inline">{{ current_user.full_name }}</span>
+                        <span class="badge bg-light text-primary ms-2 d-none d-md-inline">{{ current_user.role|title }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% if current_user.role == 'student' %}{{ url_for('student.profile') }}{% else %}#{% endif %}">
+                            <i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.change_password') }}">
+                            <i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div style="padding-top: 56px;">
+        {% if current_user.is_authenticated %}
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            {% block sidebar %}
+            {% if current_user.role == 'student' %}
+            <div class="sidebar-heading">Student</div>
+            <a class="nav-link {% if request.endpoint == 'student.dashboard' %}active{% endif %}" href="{{ url_for('student.dashboard') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link {% if request.endpoint == 'student.apply_outpass' %}active{% endif %}" href="{{ url_for('student.apply_outpass') }}">
+                <i class="bi bi-plus-circle"></i> Apply Outpass</a>
+            <a class="nav-link {% if request.endpoint == 'student.my_outpasses' %}active{% endif %}" href="{{ url_for('student.my_outpasses') }}">
+                <i class="bi bi-list-check"></i> My Outpasses</a>
+            <a class="nav-link {% if request.endpoint == 'student.profile' %}active{% endif %}" href="{{ url_for('student.profile') }}">
+                <i class="bi bi-person"></i> Profile</a>
+            <a class="nav-link {% if request.endpoint == 'student.notifications' %}active{% endif %}" href="{{ url_for('student.notifications') }}">
+                <i class="bi bi-bell"></i> Notifications
+                {% if unread_count > 0 %}<span class="badge bg-danger ms-auto">{{ unread_count }}</span>{% endif %}
+            </a>
+            
+            {% elif current_user.role in ['warden', 'advisor'] %}
+            <div class="sidebar-heading">Approvals</div>
+            <a class="nav-link {% if request.endpoint == 'warden.dashboard' %}active{% endif %}" href="{{ url_for('warden.dashboard') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link {% if request.endpoint == 'warden.approval_queue' %}active{% endif %}" href="{{ url_for('warden.approval_queue') }}">
+                <i class="bi bi-inbox"></i> Approval Queue</a>
+            <a class="nav-link {% if request.endpoint == 'warden.students_list' %}active{% endif %}" href="{{ url_for('warden.students_list') }}">
+                <i class="bi bi-people"></i> Students</a>
+            <a class="nav-link {% if request.endpoint == 'warden.notifications' %}active{% endif %}" href="{{ url_for('warden.notifications') }}">
+                <i class="bi bi-bell"></i> Notifications
+                {% if unread_count > 0 %}<span class="badge bg-danger ms-auto">{{ unread_count }}</span>{% endif %}
+            </a>
+            
+            {% elif current_user.role == 'guard' %}
+            <div class="sidebar-heading">Gate</div>
+            <a class="nav-link {% if request.endpoint == 'guard.dashboard' %}active{% endif %}" href="{{ url_for('guard.dashboard') }}">
+                <i class="bi bi-qr-code-scan"></i> Scanner</a>
+            <a class="nav-link {% if request.endpoint == 'guard.movement_log' %}active{% endif %}" href="{{ url_for('guard.movement_log') }}">
+                <i class="bi bi-journal-text"></i> Movement Log</a>
+            
+            {% elif current_user.role == 'admin' %}
+            <div class="sidebar-heading">Admin</div>
+            <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard</a>
+            <div class="sidebar-heading">Manage</div>
+            <a class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}" href="{{ url_for('admin.users') }}">
+                <i class="bi bi-people"></i> Users</a>
+            <a class="nav-link {% if request.endpoint == 'admin.blocks' %}active{% endif %}" href="{{ url_for('admin.blocks') }}">
+                <i class="bi bi-building"></i> Hostel Blocks</a>
+            <a class="nav-link {% if request.endpoint == 'admin.rooms' %}active{% endif %}" href="{{ url_for('admin.rooms') }}">
+                <i class="bi bi-door-open"></i> Rooms</a>
+            <a class="nav-link {% if request.endpoint == 'admin.departments' %}active{% endif %}" href="{{ url_for('admin.departments') }}">
+                <i class="bi bi-diagram-3"></i> Departments</a>
+            <a class="nav-link {% if request.endpoint == 'admin.outpass_types' %}active{% endif %}" href="{{ url_for('admin.outpass_types') }}">
+                <i class="bi bi-gear"></i> Outpass Types</a>
+            <a class="nav-link {% if request.endpoint == 'admin.restrictions' %}active{% endif %}" href="{{ url_for('admin.restrictions') }}">
+                <i class="bi bi-shield-x"></i> Restrictions</a>
+            <div class="sidebar-heading">Reports</div>
+            <a class="nav-link {% if request.endpoint == 'admin.reports' %}active{% endif %}" href="{{ url_for('admin.reports') }}">
+                <i class="bi bi-bar-chart"></i> Reports</a>
+            <a class="nav-link {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}" href="{{ url_for('admin.audit_logs') }}">
+                <i class="bi bi-journal-code"></i> Audit Logs</a>
+            <a class="nav-link {% if request.endpoint == 'admin.announcements' %}active{% endif %}" href="{{ url_for('admin.announcements') }}">
+                <i class="bi bi-megaphone"></i> Announcements</a>
+            {% endif %}
+            {% endblock %}
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+        {% else %}
+        <main>
+        {% endif %}
+            <!-- Announcements -->
+            {% for annc in announcements %}
+            <div class="announcement-bar {% if annc.category == 'urgent' %}urgent{% endif %}">
+                <i class="bi bi-megaphone-fill me-2"></i>
+                <strong>{{ annc.title }}:</strong> {{ annc.content }}
+            </div>
+            {% endfor %}
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="toast-container">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}x-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}-fill me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar')?.classList.toggle('show');
+        });
+        
+        // Auto-dismiss alerts after 5 seconds
+        document.querySelectorAll('.alert').forEach(function(alert) {
+            setTimeout(function() {
+                var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

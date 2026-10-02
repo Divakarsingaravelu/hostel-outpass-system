@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Announcements{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-megaphone me-2"></i>Announcements</h4></div>
+<div class="row"><div class="col-md-8">
+{% for a in announcements %}<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between">
+<div><span class="badge bg-{% if a.category=='urgent' %}danger{% else %}info{% endif %} me-2">{{ a.category }}</span><strong>{{ a.title }}</strong><p class="mb-0 small">{{ a.content }}</p><small class="text-muted">{{ a.created_at.strftime('%d-%m-%Y %H:%M') }} by {{ a.author.full_name }}</small></div>
+<form method="POST" action="{{ url_for('admin.toggle_announcement', ann_id=a.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-{% if a.is_active %}danger{% else %}success{% endif %}">{% if a.is_active %}Hide{% else %}Show{% endif %}</button></form>
+</div></div>{% else %}<div class="empty-state py-4"><h6>No announcements</h6></div>{% endfor %}</div>
+<div class="col-md-4"><div class="form-card"><h6>New Announcement</h6>
+<form method="POST" action="{{ url_for('admin.create_announcement') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-2"><input class="form-control form-control-sm" name="title" placeholder="Title" required></div>
+<div class="mb-2"><textarea class="form-control form-control-sm" name="content" rows="3" placeholder="Content" required></textarea></div>
+<div class="mb-2"><select class="form-select form-select-sm" name="category"><option value="general">General</option><option value="urgent">Urgent</option><option value="maintenance">Maintenance</option></select></div>
+<button class="btn btn-primary btn-sm w-100">Publish</button></form></div></div></div>{% endblock %}

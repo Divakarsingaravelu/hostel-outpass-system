@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Restrictions{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-shield-x me-2"></i>Student Restrictions</h4></div>
+<div class="row"><div class="col-md-8">
+{% if restricted %}<table class="table table-custom"><thead><tr><th>Student</th><th>Reg No</th><th>Reason</th><th>Until</th><th>Action</th></tr></thead><tbody>
+{% for s in restricted %}<tr><td>{{ s.user.full_name }}</td><td>{{ s.register_number }}</td><td>{{ s.restriction_reason }}</td><td>{{ s.restricted_until.strftime('%d-%m-%Y') if s.restricted_until else 'Indefinite' }}</td>
+<td><form method="POST" action="{{ url_for('admin.remove_restriction', student_id=s.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-success">Remove</button></form></td></tr>{% endfor %}
+</tbody></table>{% else %}<div class="empty-state py-4"><i class="bi bi-shield-check d-block text-success"></i><h6>No restricted students</h6></div>{% endif %}</div>
+<div class="col-md-4"><div class="form-card"><h6>Add Restriction</h6>
+<form method="POST" action="{{ url_for('admin.add_restriction') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-2"><select class="form-select form-select-sm" name="student_id" required>{% for s in students %}<option value="{{ s.id }}">{{ s.register_number }} - {{ s.user.full_name }}</option>{% endfor %}</select></div>
+<div class="mb-2"><textarea class="form-control form-control-sm" name="reason" placeholder="Reason" required></textarea></div>
+<div class="mb-2"><input type="number" class="form-control form-control-sm" name="duration_days" placeholder="Duration (days)" value="30"></div>
+<button class="btn btn-danger btn-sm w-100">Restrict</button></form></div></div></div>{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Notifications{% endblock %}{% block content %}
+<div class="page-header d-flex justify-content-between"><h4><i class="bi bi-bell me-2"></i>Notifications</h4>
+<form method="POST" action="{{ url_for('warden.mark_notifications_read') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-primary"><i class="bi bi-check-all me-1"></i>Mark All Read</button></form></div>
+{% for n in notifications.items %}
+<div class="card mb-2 {% if not n.is_read %}border-start border-4 border-{{ n.category }}{% endif %}"><div class="card-body py-2 d-flex justify-content-between">
+<div><i class="bi bi-{% if n.category=='success' %}check-circle text-success{% elif n.category=='danger' %}exclamation-circle text-danger{% elif n.category=='warning' %}exclamation-triangle text-warning{% else %}info-circle text-info{% endif %} me-2"></i><strong>{{ n.title }}</strong><p class="mb-0 text-muted small">{{ n.message }}</p></div>
+<div class="text-end"><small class="text-muted">{{ n.created_at.strftime('%d-%m %H:%M') }}</small>{% if n.link %}<br><a href="{{ n.link }}" class="btn btn-sm btn-outline-primary mt-1">View</a>{% endif %}</div>
+</div></div>{% else %}<div class="empty-state"><i class="bi bi-bell-slash d-block"></i><h5>No notifications</h5></div>{% endfor %}
+{% endblock %}

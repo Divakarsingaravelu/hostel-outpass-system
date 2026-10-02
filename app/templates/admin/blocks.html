@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Hostel Blocks{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-building me-2"></i>Hostel Blocks</h4></div>
+<div class="row"><div class="col-md-8">
+<div class="table-responsive"><table class="table table-custom"><thead><tr><th>Name</th><th>Code</th><th>Gender</th><th>Warden</th><th>Students</th></tr></thead><tbody>
+{% for b in blocks %}<tr><td>{{ b.name }}</td><td>{{ b.code }}</td><td>{{ b.gender }}</td><td>{{ b.warden.full_name if b.warden else 'Unassigned' }}</td><td>{{ b.students|length }}</td></tr>{% else %}<tr><td colspan="5"><div class="empty-state py-3"><h6>No blocks</h6></div></td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="col-md-4"><div class="form-card"><h6>Add Block</h6>
+<form method="POST" action="{{ url_for('admin.create_block') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-2"><input class="form-control form-control-sm" name="name" placeholder="Block Name" required></div>
+<div class="mb-2"><input class="form-control form-control-sm" name="code" placeholder="Code (e.g. BH1)" required></div>
+<div class="mb-2"><select class="form-select form-select-sm" name="gender"><option value="male">Male</option><option value="female">Female</option></select></div>
+<div class="mb-2"><select class="form-select form-select-sm" name="warden_id"><option value="">No Warden</option>
+{% for u in [] %}{% endfor %}</select></div>
+<button class="btn btn-primary btn-sm w-100">Add Block</button></form></div></div></div>{% endblock %}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Gate Scanner{% endblock %}
+{% block extra_css %}
+<style>
+    #qr-reader { width: 100%; max-width: 400px; margin: 0 auto; }
+    #qr-reader video { border-radius: 12px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h4><i class="bi bi-qr-code-scan me-2"></i>Gate Scanner</h4></div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="form-card scanner-container">
+            <h5 class="mb-3 text-center">Scan QR or Enter Outpass No.</h5>
+            
+            <!-- QR Scanner -->
+            <div id="qr-reader" class="mb-3"></div>
+            <button class="btn btn-primary w-100 mb-3" id="startScan">
+                <i class="bi bi-camera me-1"></i>Start Camera Scanner
+            </button>
+            
+            <div class="text-center text-muted mb-3">— OR —</div>
+            
+            <!-- Manual Entry -->
+            <form method="POST" action="{{ url_for('guard.verify') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="qr_data" id="qrDataInput" value="">
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control" name="outpass_number" placeholder="OP-XXXXXXXX-XXXX" id="outpassInput">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <!-- Students Currently Outside -->
+        <div class="card mb-4">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-people me-2"></i>Currently Outside ({{ students_out|length }})</h6></div>
+            <div class="card-body p-0">
+                {% if students_out %}
+                <div class="table-responsive">
+                <table class="table table-custom table-sm mb-0">
+                    <thead><tr><th>Student</th><th>Type</th><th>Return By</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for op in students_out %}
+                    <tr class="{% if op.status == 'OVERDUE' %}table-danger{% endif %}">
+                        <td><strong>{{ op.student.user.full_name }}</strong><br><small>{{ op.student.register_number }}</small></td>
+                        <td>{{ op.outpass_type.name }}</td>
+                        <td>{{ op.expected_return_datetime.strftime('%d-%m %H:%M') }}</td>
+                        <td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                {% else %}
+                <div class="empty-state py-3"><p>No students outside</p></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Today's Log -->
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-journal-text me-2"></i>Today's Log ({{ today_logs|length }})</h6></div>
+            <div class="card-body p-0">
+                {% if today_logs %}
+                <div class="table-responsive">
+                <table class="table table-custom table-sm mb-0">
+                    <thead><tr><th>Time</th><th>Student</th><th>Action</th><th>Outpass</th></tr></thead>
+                    <tbody>
+                    {% for log in today_logs[:20] %}
+                    <tr>
+                        <td>{{ log.timestamp.strftime('%H:%M') }}</td>
+                        <td>{{ log.outpass_request.student.user.full_name }}</td>
+                        <td><span class="badge {% if log.action == 'OUT' %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ log.action }}</span></td>
+                        <td>{{ log.outpass_request.outpass_number }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                {% else %}
+                <div class="empty-state py-3"><p>No movements today</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script>
+let scanner = null;
+document.getElementById('startScan').addEventListener('click', function() {
+    if (scanner) {
+        scanner.stop().then(() => { scanner = null; this.innerHTML = '<i class="bi bi-camera me-1"></i>Start Camera Scanner'; });
+        return;
+    }
+    scanner = new Html5Qrcode("qr-reader");
+    scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+            scanner.stop().then(() => { scanner = null; });
+            document.getElementById('qrDataInput').value = decodedText;
+            document.getElementById('qrDataInput').closest('form').submit();
+        },
+        () => {}
+    ).then(() => {
+        this.innerHTML = '<i class="bi bi-stop-circle me-1"></i>Stop Scanner';
+    }).catch(err => {
+        alert('Camera access denied or not available: ' + err);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

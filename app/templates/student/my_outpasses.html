@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}My Outpasses{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h4><i class="bi bi-list-check me-2"></i>My Outpasses</h4>
+    <a href="{{ url_for('student.apply_outpass') }}" class="btn btn-primary"><i class="bi bi-plus me-1"></i>New</a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    {% for s in ['PENDING','PARTIALLY_APPROVED','APPROVED','REJECTED','CANCELLED','EXPIRED','OUT','RETURNED','OVERDUE'] %}
+                    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">All Types</option>
+                    {% for t in outpass_types %}
+                    <option value="{{ t.id }}" {% if type_filter == t.id|string %}selected{% endif %}>{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto"><button class="btn btn-primary btn-sm">Filter</button></div>
+            <div class="col-auto"><a href="{{ url_for('student.my_outpasses') }}" class="btn btn-outline-secondary btn-sm">Reset</a></div>
+        </form>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-responsive">
+    <table class="table table-custom">
+        <thead><tr><th>Outpass #</th><th>Type</th><th>Destination</th><th>Out Date</th><th>Return Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for op in outpasses.items %}
+        <tr>
+            <td><strong>{{ op.outpass_number }}</strong>{% if op.is_emergency %}<span class="emergency-tag ms-1">EMERGENCY</span>{% endif %}</td>
+            <td>{{ op.outpass_type.name }}</td>
+            <td>{{ op.destination[:25] }}{% if op.destination|length > 25 %}...{% endif %}</td>
+            <td>{{ op.out_datetime.strftime('%d-%m-%Y %H:%M') }}</td>
+            <td>{{ op.expected_return_datetime.strftime('%d-%m-%Y %H:%M') }}</td>
+            <td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span></td>
+            <td class="text-nowrap">
+                <a href="{{ url_for('student.view_outpass', outpass_id=op.id) }}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                {% if op.status in ['APPROVED','OUT','RETURNED'] %}
+                <a href="{{ url_for('student.download_pdf', outpass_id=op.id) }}" class="btn btn-sm btn-outline-success" title="PDF"><i class="bi bi-file-pdf"></i></a>
+                {% endif %}
+                {% if op.status in ['PENDING','PARTIALLY_APPROVED'] %}
+                <form method="POST" action="{{ url_for('student.cancel', outpass_id=op.id) }}" class="d-inline"
+                      onsubmit="return confirm('Cancel this outpass?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" title="Cancel"><i class="bi bi-x-circle"></i></button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7"><div class="empty-state py-4"><i class="bi bi-inbox d-block"></i><h6>No outpasses found</h6></div></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if outpasses.pages > 1 %}
+<nav><ul class="pagination justify-content-center">
+    {% if outpasses.has_prev %}<li class="page-item"><a class="page-link" href="?page={{ outpasses.prev_num }}&status={{ status_filter }}&type={{ type_filter }}">Prev</a></li>{% endif %}
+    {% for p in outpasses.iter_pages() %}
+        {% if p %}<li class="page-item {% if p == outpasses.page %}active{% endif %}"><a class="page-link" href="?page={{ p }}&status={{ status_filter }}&type={{ type_filter }}">{{ p }}</a></li>
+        {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+    {% endfor %}
+    {% if outpasses.has_next %}<li class="page-item"><a class="page-link" href="?page={{ outpasses.next_num }}&status={{ status_filter }}&type={{ type_filter }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Departments{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-diagram-3 me-2"></i>Departments</h4></div>
+<div class="row"><div class="col-md-8"><table class="table table-custom"><thead><tr><th>Name</th><th>Code</th><th>Students</th></tr></thead><tbody>
+{% for d in departments %}<tr><td>{{ d.name }}</td><td>{{ d.code }}</td><td>{{ d.students|length }}</td></tr>{% else %}<tr><td colspan="3"><div class="empty-state py-3"><h6>No departments</h6></div></td></tr>{% endfor %}
+</tbody></table></div>
+<div class="col-md-4"><div class="form-card"><h6>Add Department</h6>
+<form method="POST" action="{{ url_for('admin.create_department') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-2"><input class="form-control form-control-sm" name="name" placeholder="Department Name" required></div>
+<div class="mb-2"><input class="form-control form-control-sm" name="code" placeholder="Code (e.g. CSE)" required></div>
+<button class="btn btn-primary btn-sm w-100">Add</button></form></div></div></div>{% endblock %}

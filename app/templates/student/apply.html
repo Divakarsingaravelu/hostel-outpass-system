@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Apply Outpass{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-plus-circle me-2"></i>Apply for Outpass</h4>
+</div>
+
+<div class="form-card" style="max-width: 700px;">
+    <form method="POST" enctype="multipart/form-data" id="outpassForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="mb-3">
+            <label class="form-label">Outpass Type <span class="text-danger">*</span></label>
+            <select class="form-select" name="type_id" id="typeSelect" required>
+                <option value="">— Select Type —</option>
+                {% for t in outpass_types %}
+                <option value="{{ t.id }}" data-parent="{{ t.requires_parent_confirmation }}" data-limit="{{ t.monthly_limit }}">
+                    {{ t.name }} (Max {{ t.monthly_limit }}/month)
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Reason <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="reason" rows="3" minlength="15" required
+                      placeholder="Describe your reason (minimum 15 characters)"></textarea>
+            <div class="form-text">Minimum 15 characters required.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Destination <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="destination" required placeholder="Where are you going?">
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Departure Date & Time <span class="text-danger">*</span></label>
+                <input type="datetime-local" class="form-control" name="out_datetime" id="outDatetime" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Expected Return <span class="text-danger">*</span></label>
+                <input type="datetime-local" class="form-control" name="expected_return_datetime" id="returnDatetime" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contact During Outpass <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" name="contact_number" pattern="\+?\d{10,15}" required
+                   placeholder="+91XXXXXXXXXX" value="{{ current_user.phone or '' }}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Attachment (optional)</label>
+            <input type="file" class="form-control" name="attachment" accept=".pdf,.jpg,.jpeg,.png">
+            <div class="form-text">Medical certificate, etc. PDF/JPG/PNG, max 2 MB.</div>
+        </div>
+
+        <div id="parentNotice" class="alert alert-info d-none">
+            <i class="bi bi-info-circle me-2"></i>This outpass type requires parent confirmation.
+            A confirmation link will be sent to your parent.
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-send me-1"></i>Submit Request
+            </button>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    // Set min datetime to now
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('outDatetime').min = now.toISOString().slice(0,16);
+    
+    // Validate return > departure
+    document.getElementById('outDatetime').addEventListener('change', function() {
+        document.getElementById('returnDatetime').min = this.value;
+    });
+
+    // Show parent notice
+    document.getElementById('typeSelect').addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        const notice = document.getElementById('parentNotice');
+        if (opt.dataset.parent === 'True') {
+            notice.classList.remove('d-none');
+        } else {
+            notice.classList.add('d-none');
+        }
+    });
+
+    // Client-side validation
+    document.getElementById('outpassForm').addEventListener('submit', function(e) {
+        const outDt = new Date(document.getElementById('outDatetime').value);
+        const retDt = new Date(document.getElementById('returnDatetime').value);
+        if (retDt <= outDt) {
+            e.preventDefault();
+            alert('Return time must be after departure time.');
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+    <p class="text-muted mb-0">Welcome back, {{ current_user.full_name }}</p>
+</div>
+
+<!-- Status Indicator -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="status-indicator {% if is_outside %}outside{% else %}in-hostel{% endif %}">
+            <i class="bi bi-{% if is_outside %}box-arrow-right{% else %}house-check{% endif %} fs-1 mb-2 d-block"></i>
+            <h5 class="mb-0">{% if is_outside %}OUTSIDE CAMPUS{% else %}IN HOSTEL{% endif %}</h5>
+            {% if active_outpass and is_outside %}
+            <small>Since {{ active_outpass.actual_out_datetime.strftime('%d-%m %H:%M') if active_outpass.actual_out_datetime else 'N/A' }}</small>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-6 col-md-4 mb-3">
+                <div class="stat-card primary">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                        <div><div class="stat-value">{{ pending_count }}</div><div class="stat-label">Pending</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+                <div class="stat-card success">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon"><i class="bi bi-calendar-month"></i></div>
+                        <div><div class="stat-value">{{ monthly_count }}</div><div class="stat-label">This Month</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 mb-3">
+                <div class="stat-card info">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="stat-icon"><i class="bi bi-list-task"></i></div>
+                        <div><div class="stat-value">{{ recent|length }}</div><div class="stat-label">Total</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Active Outpass -->
+{% if active_outpass %}
+<div class="card mb-4 border-{% if active_outpass.status == 'OVERDUE' %}danger{% else %}primary{% endif %}">
+    <div class="card-header bg-{% if active_outpass.status == 'OVERDUE' %}danger{% else %}primary{% endif %} text-white">
+        <i class="bi bi-ticket-detailed me-2"></i>Active Outpass — {{ active_outpass.outpass_number }}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Type:</strong> {{ active_outpass.outpass_type.name }}</p>
+                <p><strong>Destination:</strong> {{ active_outpass.destination }}</p>
+                <p><strong>Status:</strong> <span class="badge {{ active_outpass.get_status_badge_class() }}">{{ active_outpass.status }}</span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Out:</strong> {{ active_outpass.out_datetime.strftime('%d-%m-%Y %H:%M') }}</p>
+                <p><strong>Expected Return:</strong> {{ active_outpass.expected_return_datetime.strftime('%d-%m-%Y %H:%M') }}</p>
+            </div>
+        </div>
+        {% if active_outpass.status == 'APPROVED' %}
+        <a href="{{ url_for('student.download_pdf', outpass_id=active_outpass.id) }}" class="btn btn-primary">
+            <i class="bi bi-download me-1"></i>Download Pass (PDF)
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <a href="{{ url_for('student.apply_outpass') }}" class="btn btn-primary btn-lg w-100 py-3">
+            <i class="bi bi-plus-circle me-2"></i>Apply for Outpass
+        </a>
+    </div>
+    <div class="col-md-6 mb-3">
+        <a href="{{ url_for('student.my_outpasses') }}" class="btn btn-outline-primary btn-lg w-100 py-3">
+            <i class="bi bi-list-check me-2"></i>View My Outpasses
+        </a>
+    </div>
+</div>
+
+<!-- Recent History -->
+<div class="card">
+    <div class="card-header"><h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent History</h6></div>
+    <div class="card-body p-0">
+        {% if recent %}
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead><tr><th>Outpass #</th><th>Type</th><th>Destination</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                {% for op in recent %}
+                <tr>
+                    <td><strong>{{ op.outpass_number }}</strong></td>
+                    <td>{{ op.outpass_type.name }}</td>
+                    <td>{{ op.destination[:30] }}</td>
+                    <td>{{ op.out_datetime.strftime('%d-%m-%Y') }}</td>
+                    <td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span></td>
+                    <td>
+                        <a href="{{ url_for('student.view_outpass', outpass_id=op.id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if op.status in ['APPROVED', 'OUT', 'RETURNED'] %}
+                        <a href="{{ url_for('student.download_pdf', outpass_id=op.id) }}" class="btn btn-sm btn-outline-success" title="Download">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="bi bi-inbox d-block"></i><h5>No outpasses yet</h5><p>Apply for your first outpass to get started.</p></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

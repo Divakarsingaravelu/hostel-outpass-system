@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% block title %}Reports{% endblock %}
+{% block extra_css %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<div class="page-header d-flex justify-content-between"><h4><i class="bi bi-bar-chart me-2"></i>Reports & Analytics</h4>
+<div><a href="{{ url_for('admin.export_excel', days=days) }}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
+<form class="d-inline ms-2"><select name="days" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+<option value="7" {% if days==7 %}selected{% endif %}>7 Days</option><option value="30" {% if days==30 %}selected{% endif %}>30 Days</option><option value="90" {% if days==90 %}selected{% endif %}>90 Days</option></select></form></div></div>
+
+<div class="row">
+    <div class="col-md-8 mb-4"><div class="chart-card"><h6>Outpasses Per Day</h6><canvas id="dailyChart"></canvas></div></div>
+    <div class="col-md-4 mb-4"><div class="chart-card"><h6>Type Distribution</h6><canvas id="typeChart"></canvas></div></div>
+    <div class="col-md-6 mb-4"><div class="chart-card"><h6>Status Distribution</h6><canvas id="statusChart"></canvas></div></div>
+    <div class="col-md-6 mb-4"><div class="chart-card"><h6>Department Usage</h6><canvas id="deptChart"></canvas></div></div>
+</div>
+
+{% block extra_js %}
+<script>
+// Daily chart
+new Chart(document.getElementById('dailyChart'), {
+    type: 'line', data: { labels: {{ daily_data|map(attribute=0)|list|tojson }}, datasets: [{
+        label: 'Outpasses', data: {{ daily_data|map(attribute=1)|list|tojson }},
+        borderColor: '#1565c0', backgroundColor: 'rgba(21,101,192,0.1)', fill: true, tension: 0.3
+    }]}, options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+// Type chart
+new Chart(document.getElementById('typeChart'), {
+    type: 'doughnut', data: { labels: {{ type_data|map(attribute=0)|list|tojson }}, datasets: [{
+        data: {{ type_data|map(attribute=1)|list|tojson }},
+        backgroundColor: ['#1565c0','#2e7d32','#f57f17','#c62828','#6a1b9a','#00838f']
+    }]}, options: { responsive: true }
+});
+// Status chart
+new Chart(document.getElementById('statusChart'), {
+    type: 'bar', data: { labels: {{ status_data|map(attribute=0)|list|tojson }}, datasets: [{
+        label: 'Count', data: {{ status_data|map(attribute=1)|list|tojson }},
+        backgroundColor: ['#ffc107','#17a2b8','#28a745','#dc3545','#6c757d','#343a40','#007bff','#28a745','#dc3545']
+    }]}, options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+// Department chart
+new Chart(document.getElementById('deptChart'), {
+    type: 'bar', data: { labels: {{ dept_data|map(attribute=0)|list|tojson }}, datasets: [{
+        label: 'Outpasses', data: {{ dept_data|map(attribute=1)|list|tojson }},
+        backgroundColor: '#42a5f5'
+    }]}, options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+});
+</script>
+{% endblock %}
+{% endblock %}

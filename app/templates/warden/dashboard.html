@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Warden Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-speedometer2 me-2"></i>Warden Dashboard</h4>
+    <p class="text-muted">{% if block %}Block: {{ block.name }}{% else %}All Blocks{% endif %}</p>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-6 col-md-3 mb-3">
+        <div class="stat-card warning"><div class="d-flex align-items-center gap-3">
+            <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div><div class="stat-value">{{ total_pending }}</div><div class="stat-label">Pending</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="stat-card danger"><div class="d-flex align-items-center gap-3">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div><div class="stat-value">{{ emergency_requests|length }}</div><div class="stat-label">Emergency</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="stat-card primary"><div class="d-flex align-items-center gap-3">
+            <div class="stat-icon"><i class="bi bi-box-arrow-right"></i></div>
+            <div><div class="stat-value">{{ students_out|length }}</div><div class="stat-label">Currently Out</div></div>
+        </div></div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+        <div class="stat-card danger"><div class="d-flex align-items-center gap-3">
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div><div class="stat-value">{{ overdue_count }}</div><div class="stat-label">Overdue</div></div>
+        </div></div>
+    </div>
+</div>
+
+<!-- Emergency Requests -->
+{% if emergency_requests %}
+<div class="card mb-4 border-danger">
+    <div class="card-header bg-danger text-white"><i class="bi bi-lightning-fill me-2"></i>Emergency Requests (Fast Track)</div>
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead><tr><th>Student</th><th>Reg No</th><th>Destination</th><th>Date</th><th>Parent</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for op in emergency_requests %}
+            <tr>
+                <td><strong>{{ op.student.user.full_name }}</strong></td>
+                <td>{{ op.student.register_number }}</td>
+                <td>{{ op.destination[:25] }}</td>
+                <td>{{ op.out_datetime.strftime('%d-%m %H:%M') }}</td>
+                <td>{% if op.parent_confirmed %}<span class="parent-badge"><i class="bi bi-check"></i> Yes</span>{% else %}<span class="parent-badge pending">Pending</span>{% endif %}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('warden.approve', outpass_id=op.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="APPROVED">
+                        <input type="hidden" name="remarks" value="Emergency fast-track approved">
+                        <button class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Quick Approve</button>
+                    </form>
+                    <a href="{{ url_for('warden.approve', outpass_id=op.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Pending Requests -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-inbox me-2"></i>Pending Requests</h6>
+        {% if regular_requests %}
+        <form method="POST" action="{{ url_for('warden.bulk_approve') }}" id="bulkForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="remarks" value="Bulk approved">
+            <button class="btn btn-sm btn-success" onclick="return confirm('Approve all selected?')">
+                <i class="bi bi-check-all me-1"></i>Bulk Approve Selected
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="card-body p-0">
+        {% if regular_requests %}
+        <table class="table table-custom mb-0">
+            <thead><tr><th><input type="checkbox" id="selectAll"></th><th>Student</th><th>Type</th><th>Destination</th><th>Out</th><th>Return</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for op in regular_requests %}
+            <tr>
+                <td><input type="checkbox" name="outpass_ids" value="{{ op.id }}" form="bulkForm"></td>
+                <td><strong>{{ op.student.user.full_name }}</strong><br><small class="text-muted">{{ op.student.register_number }}</small></td>
+                <td>{{ op.outpass_type.name }}</td>
+                <td>{{ op.destination[:20] }}</td>
+                <td>{{ op.out_datetime.strftime('%d-%m %H:%M') }}</td>
+                <td>{{ op.expected_return_datetime.strftime('%d-%m %H:%M') }}</td>
+                <td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span>
+                    {% if op.parent_confirmed %}<span class="parent-badge ms-1"><i class="bi bi-check"></i></span>{% endif %}</td>
+                <td><a href="{{ url_for('warden.approve', outpass_id=op.id) }}" class="btn btn-sm btn-primary">Review</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state py-4"><i class="bi bi-check-circle d-block text-success"></i><h6>All caught up!</h6><p>No pending requests.</p></div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Students Currently Outside -->
+{% if students_out %}
+<div class="card">
+    <div class="card-header"><h6 class="mb-0"><i class="bi bi-people me-2"></i>Students Currently Outside ({{ students_out|length }})</h6></div>
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead><tr><th>Student</th><th>Reg No</th><th>Type</th><th>Left At</th><th>Expected Return</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for op in students_out %}
+            <tr class="{% if op.status == 'OVERDUE' %}table-danger{% endif %}">
+                <td>{{ op.student.user.full_name }}</td>
+                <td>{{ op.student.register_number }}</td>
+                <td>{{ op.outpass_type.name }}</td>
+                <td>{{ op.actual_out_datetime.strftime('%d-%m %H:%M') if op.actual_out_datetime else 'N/A' }}</td>
+                <td>{{ op.expected_return_datetime.strftime('%d-%m %H:%M') }}</td>
+                <td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+document.getElementById('selectAll')?.addEventListener('change', function() {
+    document.querySelectorAll('input[name="outpass_ids"]').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}
+{% endblock %}

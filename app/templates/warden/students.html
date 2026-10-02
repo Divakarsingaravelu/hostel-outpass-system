@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Students{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-people me-2"></i>Students{% if block %} — {{ block.name }}{% endif %}</h4></div>
+<div class="table-responsive"><table class="table table-custom"><thead><tr><th>Reg No</th><th>Name</th><th>Dept</th><th>Year</th><th>Room</th><th>Phone</th><th>Status</th></tr></thead><tbody>
+{% for s in students %}<tr>
+<td>{{ s.register_number }}</td><td>{{ s.user.full_name }}</td><td>{{ s.department.code if s.department else 'N/A' }}</td><td>{{ s.year or '' }}</td><td>{{ s.room.room_number if s.room else 'N/A' }}</td><td>{{ s.user.phone or '' }}</td>
+<td>{% if s.is_restricted %}<span class="badge bg-danger">Restricted</span>{% else %}<span class="badge bg-success">Active</span>{% endif %}</td>
+</tr>{% else %}<tr><td colspan="7"><div class="empty-state py-4"><h6>No students found</h6></div></td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}

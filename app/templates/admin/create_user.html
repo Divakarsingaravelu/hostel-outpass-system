@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}Create User{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-person-plus me-2"></i>Create User</h4></div>
+<div class="form-card" style="max-width:700px">
+<form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="row"><div class="col-md-6 mb-3"><label class="form-label">Username / ID *</label><input class="form-control" name="username" required></div>
+<div class="col-md-6 mb-3"><label class="form-label">Full Name *</label><input class="form-control" name="full_name" required></div>
+<div class="col-md-6 mb-3"><label class="form-label">Role *</label><select class="form-select" name="role" id="roleSelect"><option value="student">Student</option><option value="warden">Warden</option><option value="advisor">Advisor</option><option value="guard">Guard</option><option value="admin">Admin</option></select></div>
+<div class="col-md-6 mb-3"><label class="form-label">Email</label><input class="form-control" name="email" type="email"></div>
+<div class="col-md-6 mb-3"><label class="form-label">Phone</label><input class="form-control" name="phone"></div>
+<div class="col-md-6 mb-3"><label class="form-label">Password</label><input class="form-control" name="password" value="Changeme@123"><div class="form-text">Default: Changeme@123</div></div>
+<div class="col-md-6 mb-3"><label class="form-label">Department</label><select class="form-select" name="department_id"><option value="">—</option>{% for d in departments %}<option value="{{ d.id }}">{{ d.name }}</option>{% endfor %}</select></div>
+<div class="col-md-6 mb-3"><label class="form-label">Hostel Block</label><select class="form-select" name="block_id"><option value="">—</option>{% for b in blocks %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}</select></div>
+</div>
+<div id="studentFields"><div class="row"><div class="col-md-4 mb-3"><label class="form-label">Year</label><select class="form-select" name="year"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+<div class="col-md-4 mb-3"><label class="form-label">Room</label><select class="form-select" name="room_id"><option value="">—</option>{% for r in rooms %}<option value="{{ r.id }}">{{ r.room_number }} ({{ r.hostel_block.name }})</option>{% endfor %}</select></div>
+<div class="col-md-4 mb-3"><label class="form-label">Blood Group</label><select class="form-select" name="blood_group"><option value="">—</option>{% for bg in ['A+','A-','B+','B-','O+','O-','AB+','AB-'] %}<option>{{ bg }}</option>{% endfor %}</select></div>
+<div class="col-md-6 mb-3"><label class="form-label">Parent Name</label><input class="form-control" name="parent_name"></div>
+<div class="col-md-6 mb-3"><label class="form-label">Parent Phone</label><input class="form-control" name="parent_phone"></div></div></div>
+<div id="staffFields" class="d-none"><div class="mb-3"><label class="form-label">Designation</label><input class="form-control" name="designation"></div></div>
+<button class="btn btn-primary"><i class="bi bi-save me-1"></i>Create User</button></form></div>
+<script>document.getElementById('roleSelect').addEventListener('change',function(){document.getElementById('studentFields').classList.toggle('d-none',this.value!='student');document.getElementById('staffFields').classList.toggle('d-none',this.value=='student');});</script>
+{% endblock %}

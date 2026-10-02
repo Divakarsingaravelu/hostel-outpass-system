@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Outpass {{ outpass.outpass_number }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h4><i class="bi bi-ticket-detailed me-2"></i>Outpass Details</h4>
+    <nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('student.my_outpasses') }}">My Outpasses</a></li><li class="breadcrumb-item active">{{ outpass.outpass_number }}</li></ol></nav>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="form-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">{{ outpass.outpass_number }}</h5>
+                <span class="badge badge-status {{ outpass.get_status_badge_class() }} fs-6">{{ outpass.status }}</span>
+            </div>
+            {% if outpass.is_emergency %}<div class="emergency-tag mb-3">⚡ EMERGENCY</div>{% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-6"><strong>Type:</strong><br>{{ outpass.outpass_type.name }}</div>
+                <div class="col-6"><strong>Destination:</strong><br>{{ outpass.destination }}</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6"><strong>Departure:</strong><br>{{ outpass.out_datetime.strftime('%d-%m-%Y %I:%M %p') }}</div>
+                <div class="col-6"><strong>Expected Return:</strong><br>{{ outpass.expected_return_datetime.strftime('%d-%m-%Y %I:%M %p') }}</div>
+            </div>
+            <div class="mb-3"><strong>Reason:</strong><br>{{ outpass.reason }}</div>
+            <div class="row mb-3">
+                <div class="col-6"><strong>Contact:</strong><br>{{ outpass.contact_number }}</div>
+                <div class="col-6">
+                    <strong>Parent Confirmed:</strong><br>
+                    {% if outpass.parent_confirmed %}<span class="parent-badge"><i class="bi bi-check-circle"></i> Confirmed</span>
+                    {% elif outpass.parent_confirmation_token %}<span class="parent-badge pending"><i class="bi bi-hourglass"></i> Pending</span>
+                    {% else %}N/A{% endif %}
+                </div>
+            </div>
+            {% if outpass.actual_out_datetime %}
+            <div class="row mb-3">
+                <div class="col-6"><strong>Actual Out:</strong><br>{{ outpass.actual_out_datetime.strftime('%d-%m-%Y %I:%M %p') }}</div>
+                <div class="col-6"><strong>Actual Return:</strong><br>{{ outpass.actual_return_datetime.strftime('%d-%m-%Y %I:%M %p') if outpass.actual_return_datetime else '—' }}</div>
+            </div>
+            {% endif %}
+            
+            {% if outpass.status in ['APPROVED', 'OUT', 'RETURNED'] %}
+            <a href="{{ url_for('student.download_pdf', outpass_id=outpass.id) }}" class="btn btn-primary">
+                <i class="bi bi-download me-1"></i>Download PDF
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="col-md-4">
+        <div class="form-card">
+            <h6 class="mb-3"><i class="bi bi-list-columns-reverse me-2"></i>Approval Timeline</h6>
+            <ul class="timeline">
+                <li class="timeline-item completed">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Submitted</div>
+                        <div class="timeline-time">{{ outpass.created_at.strftime('%d-%m-%Y %H:%M') }}</div>
+                    </div>
+                </li>
+                {% for approval in outpass.approvals %}
+                <li class="timeline-item {% if approval.status == 'APPROVED' %}completed{% elif approval.status == 'REJECTED' %}rejected{% elif approval.status == 'PENDING' %}active{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ approval.approver_role|title }} — {{ approval.status }}</div>
+                        {% if approval.acted_at %}<div class="timeline-time">{{ approval.acted_at.strftime('%d-%m-%Y %H:%M') }}</div>{% endif %}
+                        {% if approval.remarks %}<div class="small text-muted mt-1">{{ approval.remarks }}</div>{% endif %}
+                        {% if approval.approver %}<div class="small">By: {{ approval.approver.full_name }}</div>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+                {% if outpass.actual_out_datetime %}
+                <li class="timeline-item completed">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content"><div class="timeline-title">Gate Exit (OUT)</div>
+                        <div class="timeline-time">{{ outpass.actual_out_datetime.strftime('%d-%m-%Y %H:%M') }}</div></div>
+                </li>
+                {% endif %}
+                {% if outpass.actual_return_datetime %}
+                <li class="timeline-item completed">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content"><div class="timeline-title">Gate Entry (IN)</div>
+                        <div class="timeline-time">{{ outpass.actual_return_datetime.strftime('%d-%m-%Y %H:%M') }}</div>
+                        {% if outpass.is_overdue %}<span class="badge bg-danger">Late Return</span>{% endif %}</div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

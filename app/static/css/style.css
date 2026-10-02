@@ -1,0 +1,546 @@
+/* ===== Digital Hostel Outpass Management System ===== */
+/* Professional college portal design — blue/white palette */
+
+:root {
+    --primary: #0F172A;       /* Slate 900 */
+    --primary-dark: #020617;  /* Slate 950 */
+    --primary-light: #334155; /* Slate 700 */
+    --secondary: #475569;     /* Slate 600 */
+    --accent: #2563EB;        /* Blue 600 */
+    --success: #16A34A;       /* Green 600 */
+    --warning: #D97706;       /* Amber 600 */
+    --danger: #DC2626;        /* Red 600 */
+    --info: #0284C7;          /* Light Blue 600 */
+    --bg-light: #F8FAFC;      /* Slate 50 */
+    --bg-card: #FFFFFF;
+    --text-primary: #0F172A;  /* Slate 900 */
+    --text-secondary: #64748B;/* Slate 500 */
+    --border: #E2E8F0;        /* Slate 200 */
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --radius: 8px;
+    --transition: all 0.2s ease-in-out;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+/* ─── Navbar ─────────────────────────────────────────── */
+.navbar-custom {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    padding: 0.5rem 1rem;
+}
+.navbar-custom .navbar-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+.navbar-custom .nav-link {
+    color: rgba(255,255,255,0.85) !important;
+    font-weight: 500;
+    transition: var(--transition);
+}
+.navbar-custom .nav-link:hover {
+    color: #fff !important;
+}
+
+/* ─── Sidebar ────────────────────────────────────────── */
+.sidebar {
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    min-height: calc(100vh - 56px);
+    width: 250px;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    z-index: 100;
+    padding-top: 1rem;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+.sidebar .nav-link {
+    color: var(--text-primary);
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 2px 8px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar .nav-link:hover {
+    background: var(--bg-light);
+    color: var(--primary);
+}
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+}
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+}
+.sidebar-heading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    padding: 0.5rem 1.2rem;
+    margin-top: 0.5rem;
+    font-weight: 700;
+}
+
+/* ─── Main Content ───────────────────────────────────── */
+.main-content {
+    margin-left: 250px;
+    padding: 1.5rem 2rem;
+    min-height: calc(100vh - 56px);
+}
+
+/* ─── Cards ──────────────────────────────────────────── */
+.stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.stat-card .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #fff;
+}
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Card color variants */
+.stat-card.primary .stat-icon { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+.stat-card.success .stat-icon { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
+.stat-card.warning .stat-icon { background: linear-gradient(135deg, #f57f17, #ffb74d); }
+.stat-card.danger .stat-icon { background: linear-gradient(135deg, #c62828, #ef5350); }
+.stat-card.info .stat-icon { background: linear-gradient(135deg, #0277bd, #4fc3f7); }
+
+/* ─── Status Badges ──────────────────────────────────── */
+.badge-status {
+    padding: 0.35em 0.75em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* ─── Status card (In Hostel / Outside) ──────────────── */
+.status-indicator {
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+    color: #fff;
+    font-weight: 700;
+}
+.status-indicator.in-hostel {
+    background: linear-gradient(135deg, #2e7d32, #4caf50);
+}
+.status-indicator.outside {
+    background: linear-gradient(135deg, #c62828, #ef5350);
+    animation: pulse-red 2s infinite;
+}
+@keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(198,40,40,0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(198,40,40,0); }
+}
+
+/* ─── Table ──────────────────────────────────────────── */
+.table-custom {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.table-custom thead th {
+    background: var(--bg-light);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border);
+    padding: 0.8rem;
+}
+.table-custom tbody td {
+    padding: 0.75rem 0.8rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+.table-custom tbody tr {
+    transition: var(--transition);
+}
+.table-custom tbody tr:hover {
+    background: #f0f4ff;
+}
+
+/* ─── Timeline ───────────────────────────────────────── */
+.timeline {
+    position: relative;
+    padding: 0;
+    list-style: none;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--border);
+    border-radius: 2px;
+}
+.timeline-item {
+    position: relative;
+    padding: 0 0 1.5rem 50px;
+}
+.timeline-item .timeline-dot {
+    position: absolute;
+    left: 12px;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--primary);
+    background: #fff;
+    z-index: 1;
+}
+.timeline-item.completed .timeline-dot {
+    background: var(--primary);
+}
+.timeline-item.active .timeline-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,111,0,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(255,111,0,0); }
+}
+.timeline-item.rejected .timeline-dot {
+    background: var(--danger);
+    border-color: var(--danger);
+}
+.timeline-content {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+.timeline-content .timeline-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.timeline-content .timeline-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* ─── Forms ──────────────────────────────────────────── */
+.form-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--secondary);
+    margin-bottom: 0.3rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.15);
+}
+
+/* ─── Buttons ────────────────────────────────────────── */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border: none;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(21,101,192,0.3);
+}
+.btn-success {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+}
+.btn-danger {
+    background: linear-gradient(135deg, #c62828, #e53935);
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* ─── Guard Scanner ──────────────────────────────────── */
+.scanner-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+.scan-result {
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+.scan-result.valid {
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+}
+.scan-result.invalid {
+    background: #ffebee;
+    border: 2px solid #f44336;
+}
+.gate-btn {
+    padding: 1rem 2rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 12px;
+    min-width: 160px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ─── Notification Bell ──────────────────────────────── */
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+}
+.notification-bell .badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 10px;
+    background: var(--danger);
+}
+
+/* ─── Toast ──────────────────────────────────────────── */
+.toast-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1080;
+}
+
+/* ─── Login Page ─────────────────────────────────────── */
+.login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #42a5f5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-card {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.login-card .logo-section {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.login-card .logo-section i {
+    font-size: 3rem;
+    color: var(--primary);
+}
+.login-card .logo-section h4 {
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+/* ─── Empty State ────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+.empty-state h5 { font-weight: 600; }
+
+/* ─── Announcement Bar ───────────────────────────────── */
+.announcement-bar {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+.announcement-bar.urgent {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    border-left-color: var(--danger);
+}
+
+/* ─── Emergency Tag ──────────────────────────────────── */
+.emergency-tag {
+    background: linear-gradient(135deg, #c62828, #e53935);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse-red 1.5s infinite;
+}
+
+/* ─── Chart Container ────────────────────────────────── */
+.chart-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+}
+.chart-card h6 {
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 1rem;
+}
+
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 100%;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    .stat-card .stat-value {
+        font-size: 1.4rem;
+    }
+    .gate-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ─── Loading Spinner ────────────────────────────────── */
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+}
+.loading-spinner.active {
+    display: block;
+}
+.spinner-grow-sm {
+    width: 0.8rem;
+    height: 0.8rem;
+}
+
+/* ─── Parent Confirmed Badge ─────────────────────────── */
+.parent-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.parent-badge.pending {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+/* ─── Page Header ────────────────────────────────────── */
+.page-header {
+    margin-bottom: 1.5rem;
+}
+.page-header h4 {
+    font-weight: 700;
+    color: var(--secondary);
+    margin-bottom: 0.25rem;
+}
+.page-header .breadcrumb {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* ─── Error Pages ────────────────────────────────────── */
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--bg-light);
+}
+.error-page .error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    opacity: 0.2;
+}
+.error-page h3 {
+    font-weight: 700;
+    margin-top: -1rem;
+}

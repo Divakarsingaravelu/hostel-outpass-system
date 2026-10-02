@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Outpass Types{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-gear me-2"></i>Outpass Types & Rules</h4></div>
+<div class="table-responsive mb-4"><table class="table table-custom"><thead><tr><th>Name</th><th>Code</th><th>Max Hours</th><th>Monthly Limit</th><th>Parent Req</th><th>Chain</th><th>Active</th><th>Action</th></tr></thead><tbody>
+{% for t in outpass_types %}<tr><td>{{ t.name }}</td><td>{{ t.code }}</td><td>{{ t.max_duration_hours }}h</td><td>{{ t.monthly_limit }}</td>
+<td>{% if t.requires_parent_confirmation %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-x-circle text-muted"></i>{% endif %}</td>
+<td>{{ t.approval_chain }}</td><td>{% if t.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Disabled</span>{% endif %}</td>
+<td><form method="POST" action="{{ url_for('admin.toggle_outpass_type', type_id=t.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-outline-{% if t.is_active %}danger{% else %}success{% endif %}">{% if t.is_active %}Disable{% else %}Enable{% endif %}</button></form></td>
+</tr>{% endfor %}</tbody></table></div>
+<div class="form-card" style="max-width:700px"><h6>Add Outpass Type</h6>
+<form method="POST" action="{{ url_for('admin.create_outpass_type') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="row"><div class="col-md-6 mb-2"><input class="form-control form-control-sm" name="name" placeholder="Name (e.g. Weekend Home)" required></div>
+<div class="col-md-6 mb-2"><input class="form-control form-control-sm" name="code" placeholder="Code (e.g. WEEKEND)" required></div>
+<div class="col-md-4 mb-2"><input type="number" class="form-control form-control-sm" name="max_duration_hours" placeholder="Max hours" value="24"></div>
+<div class="col-md-4 mb-2"><input type="number" class="form-control form-control-sm" name="monthly_limit" placeholder="Monthly limit" value="4"></div>
+<div class="col-md-4 mb-2"><div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="requires_parent" id="reqParent"><label class="form-check-label" for="reqParent">Parent Confirm</label></div></div>
+<div class="col-md-6 mb-2"><input class="form-control form-control-sm" name="approval_chain" placeholder="Chain (e.g. advisor,warden)" value="warden"></div>
+<div class="col-md-6 mb-2"><input class="form-control form-control-sm" name="description" placeholder="Description"></div></div>
+<button class="btn btn-primary btn-sm">Add Type</button></form></div>{% endblock %}

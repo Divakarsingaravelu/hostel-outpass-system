@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-header"><h4><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h4></div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card primary"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-people"></i></div><div><div class="stat-value">{{ total_students }}</div><div class="stat-label">Students</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card info"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div><div class="stat-value">{{ total_staff }}</div><div class="stat-label">Staff</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card success"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-ticket"></i></div><div><div class="stat-value">{{ total_outpasses }}</div><div class="stat-label">Total Outpasses</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card warning"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-hourglass"></i></div><div><div class="stat-value">{{ pending }}</div><div class="stat-label">Pending</div></div></div></div></div>
+</div>
+<div class="row mb-4">
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card danger"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-box-arrow-right"></i></div><div><div class="stat-value">{{ students_out }}</div><div class="stat-label">Out Now</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card danger"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div><div><div class="stat-value">{{ overdue }}</div><div class="stat-label">Overdue</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card success"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-arrow-right-circle"></i></div><div><div class="stat-value">{{ today_exits }}</div><div class="stat-label">Exits Today</div></div></div></div></div>
+    <div class="col-6 col-md-3 mb-3"><div class="stat-card info"><div class="d-flex align-items-center gap-3"><div class="stat-icon"><i class="bi bi-arrow-left-circle"></i></div><div><div class="stat-value">{{ today_entries }}</div><div class="stat-label">Entries Today</div></div></div></div></div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card"><div class="card-header"><h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h6></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-sm mb-0"><tbody>
+        {% for log in recent_logs %}<tr><td><small class="text-muted">{{ log.timestamp.strftime('%d-%m %H:%M') }}</small></td><td>{{ log.action }}</td><td>{{ log.details[:50] if log.details else '' }}</td></tr>{% endfor %}
+        </tbody></table></div></div></div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card"><div class="card-header"><h6 class="mb-0"><i class="bi bi-ticket me-2"></i>Recent Outpasses</h6></div>
+        <div class="card-body p-0"><div class="table-responsive"><table class="table table-sm mb-0"><tbody>
+        {% for op in recent_outpasses %}<tr><td>{{ op.outpass_number }}</td><td>{{ op.student.user.full_name }}</td><td><span class="badge badge-status {{ op.get_status_badge_class() }}">{{ op.status }}</span></td></tr>{% endfor %}
+        </tbody></table></div></div></div>
+    </div>
+</div>
+{% endblock %}

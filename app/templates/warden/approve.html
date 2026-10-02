@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Review Outpass{% endblock %}
+{% block content %}
+<div class="page-header"><h4><i class="bi bi-clipboard-check me-2"></i>Review Outpass</h4></div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="form-card mb-4">
+            <div class="d-flex justify-content-between mb-3">
+                <h5>{{ outpass.outpass_number }}</h5>
+                <span class="badge badge-status {{ outpass.get_status_badge_class() }} fs-6">{{ outpass.status }}</span>
+            </div>
+            {% if outpass.is_emergency %}<div class="emergency-tag mb-3">⚡ EMERGENCY</div>{% endif %}
+            
+            <div class="row g-3 mb-3">
+                <div class="col-6"><strong>Student:</strong><br>{{ outpass.student.user.full_name }}</div>
+                <div class="col-6"><strong>Register No:</strong><br>{{ outpass.student.register_number }}</div>
+                <div class="col-6"><strong>Department:</strong><br>{{ outpass.student.department.name if outpass.student.department else 'N/A' }}</div>
+                <div class="col-6"><strong>Block/Room:</strong><br>{{ outpass.student.hostel_block.name if outpass.student.hostel_block else 'N/A' }} / {{ outpass.student.room.room_number if outpass.student.room else 'N/A' }}</div>
+                <div class="col-6"><strong>Type:</strong><br>{{ outpass.outpass_type.name }}</div>
+                <div class="col-6"><strong>Destination:</strong><br>{{ outpass.destination }}</div>
+                <div class="col-6"><strong>Departure:</strong><br>{{ outpass.out_datetime.strftime('%d-%m-%Y %I:%M %p') }}</div>
+                <div class="col-6"><strong>Return:</strong><br>{{ outpass.expected_return_datetime.strftime('%d-%m-%Y %I:%M %p') }}</div>
+                <div class="col-12"><strong>Reason:</strong><br>{{ outpass.reason }}</div>
+                <div class="col-6"><strong>Contact:</strong><br>{{ outpass.contact_number }}</div>
+                <div class="col-6"><strong>Parent:</strong><br>{{ outpass.student.parent_name or 'N/A' }} ({{ outpass.student.parent_phone or 'N/A' }})
+                    {% if outpass.parent_confirmed %}<span class="parent-badge ms-1"><i class="bi bi-check-circle"></i> Confirmed</span>{% endif %}
+                </div>
+            </div>
+            {% if outpass.attachment_filename %}
+            <p><i class="bi bi-paperclip me-1"></i><a href="{{ url_for('static', filename='uploads/attachments/' + outpass.attachment_filename) }}" target="_blank">View Attachment</a></p>
+            {% endif %}
+        </div>
+
+        <!-- Approval Form -->
+        {% if outpass.status in ['PENDING', 'PARTIALLY_APPROVED'] %}
+        <div class="form-card">
+            <h6 class="mb-3">Your Decision</h6>
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                    <label class="form-label">Remarks {% if True %}(mandatory for rejection){% endif %}</label>
+                    <textarea class="form-control" name="remarks" rows="3" placeholder="Add your remarks..."></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="action" value="APPROVED" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-lg me-1"></i>Approve
+                    </button>
+                    <button type="submit" name="action" value="REJECTED" class="btn btn-danger btn-lg"
+                            onclick="if(!document.querySelector('[name=remarks]').value){alert('Remarks required for rejection');return false;}">
+                        <i class="bi bi-x-lg me-1"></i>Reject
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        <div class="form-card">
+            <h6><i class="bi bi-clock-history me-2"></i>Approval History</h6>
+            <ul class="timeline">
+                <li class="timeline-item completed"><div class="timeline-dot"></div>
+                    <div class="timeline-content"><div class="timeline-title">Submitted</div>
+                    <div class="timeline-time">{{ outpass.created_at.strftime('%d-%m-%Y %H:%M') }}</div></div></li>
+                {% for a in outpass.approvals %}
+                <li class="timeline-item {% if a.status == 'APPROVED' %}completed{% elif a.status == 'REJECTED' %}rejected{% else %}active{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content"><div class="timeline-title">{{ a.approver_role|title }}: {{ a.status }}</div>
+                    {% if a.acted_at %}<div class="timeline-time">{{ a.acted_at.strftime('%d-%m-%Y %H:%M') }}</div>{% endif %}
+                    {% if a.remarks %}<small class="text-muted">{{ a.remarks }}</small>{% endif %}</div></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

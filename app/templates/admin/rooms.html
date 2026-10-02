@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}Rooms{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-door-open me-2"></i>Rooms</h4></div>
+<div class="row"><div class="col-md-8">
+<form class="mb-3"><select name="block_id" class="form-select form-select-sm d-inline-block w-auto"><option value="">All Blocks</option>{% for b in blocks %}<option value="{{ b.id }}" {% if block_id==b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select><button class="btn btn-primary btn-sm ms-2">Filter</button></form>
+<table class="table table-custom"><thead><tr><th>Room</th><th>Block</th><th>Floor</th><th>Capacity</th><th>Occupants</th></tr></thead><tbody>
+{% for r in rooms %}<tr><td>{{ r.room_number }}</td><td>{{ r.hostel_block.name }}</td><td>{{ r.floor }}</td><td>{{ r.capacity }}</td><td>{{ r.students|length }}</td></tr>{% else %}<tr><td colspan="5"><div class="empty-state py-3"><h6>No rooms</h6></div></td></tr>{% endfor %}
+</tbody></table></div>
+<div class="col-md-4"><div class="form-card"><h6>Add Room</h6>
+<form method="POST" action="{{ url_for('admin.create_room') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-2"><input class="form-control form-control-sm" name="room_number" placeholder="Room No" required></div>
+<div class="mb-2"><select class="form-select form-select-sm" name="block_id" required>{% for b in blocks %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}</select></div>
+<div class="mb-2"><input type="number" class="form-control form-control-sm" name="floor" placeholder="Floor" value="0"></div>
+<div class="mb-2"><input type="number" class="form-control form-control-sm" name="capacity" placeholder="Capacity" value="2"></div>
+<button class="btn btn-primary btn-sm w-100">Add Room</button></form></div></div></div>{% endblock %}

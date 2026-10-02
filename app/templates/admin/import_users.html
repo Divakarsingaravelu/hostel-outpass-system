@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Import Users{% endblock %}{% block content %}
+<div class="page-header"><h4><i class="bi bi-upload me-2"></i>Import Students from CSV</h4></div>
+<div class="form-card" style="max-width:600px">
+<div class="alert alert-info"><strong>CSV Format:</strong> register_number, full_name, email, phone, department, block, room, year, parent_name, parent_phone, blood_group, password</div>
+<form method="POST" enctype="multipart/form-data"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="mb-3"><label class="form-label">Select CSV File</label><input type="file" class="form-control" name="csv_file" accept=".csv" required></div>
+<button class="btn btn-primary"><i class="bi bi-upload me-1"></i>Import</button></form></div>{% endblock %}

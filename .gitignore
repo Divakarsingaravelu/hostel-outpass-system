@@ -1,0 +1,39 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Database
+*.sqlite3
+app.db
+instance/
+migrations/
+
+# Flask
+.flaskenv
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Uploads
+app/static/uploads/qrcodes/*
+app/static/uploads/photos/*
+app/static/uploads/attachments/*
+!app/static/uploads/.gitkeep
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db
